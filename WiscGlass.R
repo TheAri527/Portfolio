@@ -31,7 +31,7 @@ library(sqldf)
 ###########################################
 
 ## AI: Import and clean the Glass data set ########
-Glass = read_csv("Glass.csv")
+Glass = read.csv("Glass.csv")
 Glass$Type = as.factor(Glass$Type)
 ###################################################
 
@@ -53,11 +53,13 @@ Education$education = Education$education/100
 ##########################################################
 
 ## AI: Import the tigris states dataset####################
-us.map <- tigris::states(cb = TRUE, year = 2019)
+us.map <- tigris::counties(cb = TRUE, year = 2019)
+us.map = subset(us.map, STATEFP == "55")
 ###########################################################
 
 ## AI: Merge the tigris data with  education #############
 EducationMapB <- merge(us.map, Education, by=c("GEOID"))
+summary(EducationMapB$education)
 ###########################################################
 
 ## AI: Format popup data for leaflet map.##################
@@ -67,14 +69,14 @@ popup_dat <- paste0("<strong>County: </strong>",
                     EducationMapB$education)
 
 popup_Distributor <- paste0("<strong>Name: </strong>",
-                     Distributor$Name,
-                     "<br><strong>Description: </strong>",
-                     Distributor$Description)
+                            Distributor$Name,
+                            "<br><strong>Description: </strong>",
+                            Distributor$Description)
 
 popup_Manufacturer <- paste0("<strong>Name: </strong>",
-                      Manufacturer$Name,
-                      "<br><strong>Description: </strong>",
-                      Manufacturer$Description)
+                             Manufacturer$Name,
+                             "<br><strong>Description: </strong>",
+                             Manufacturer$Description)
 
 popup_Plant <- paste0("<strong>Name: </strong>",
                       Plant$Name,
@@ -82,9 +84,9 @@ popup_Plant <- paste0("<strong>Name: </strong>",
                       Plant$Description)
 
 popup_Service <- paste0("<strong>Name: </strong>",
-                      Service$Name,
-                      "<br><strong>Description: </strong>",
-                      Service$Description)
+                        Service$Name,
+                        "<br><strong>Description: </strong>",
+                        Service$Description)
 ###########################################################
 
 ## AI: Colorbin ###########################################
@@ -106,7 +108,7 @@ gmap2 <- leaflet(data = EducationMapB) %>%
               smoothFactor = 0.1,
               #AI: Editeed the group 
               group="College Educated (%)") %>%
-  addLegend("bottomleft",pal = pal, values = ~education, title = "% Finished College",opacity = 1) %>%
+  addLegend("bottomleft",pal = pal, values = ~education, title = "College Educated (%)",opacity = 1) %>%
   addMarkers(data = Distributor, lat=~Latitude, lng = ~Longitude, popup = popup_Distributor, group = "Distributor") %>%
   addMarkers(data = Manufacturer, lat=~Latitude, lng = ~Longitude, popup = popup_Manufacturer, group = "Manufacturer") %>%
   addMarkers(data = Plant, lat=~Latitude, lng = ~Longitude, popup = popup_Plant, group = "Plant") %>%
@@ -115,9 +117,7 @@ gmap2 <- leaflet(data = EducationMapB) %>%
   addLayersControl(
     #Base group label
     baseGroups = c("College Educated (%)"),
-    
     overlayGroups = c("Distributor", "Manufacturer", "Plant", "Services"),
-    
     options = layersControlOptions(collapsed = FALSE)
   )
 
